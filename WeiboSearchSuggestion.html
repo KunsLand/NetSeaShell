@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link rel="shortcut icon" type="image/png" href="favicon.png"/>
+		<link rel="stylesheet" type="text/css" href="bootstrap-3.3.5-dist/css/bootstrap.min.css">
+		<style type="text/css">
+			.table-nonfluid {
+			   width: auto !important;
+			}
+			.table td, .table th {
+			    border: none !important;
+			}
+
+			.W_icon {
+			    display: inline-block;
+			    background-image: url("icon.png");
+			    background-repeat: no-repeat;
+			    width: 14px;
+			    height: 14px;
+			    margin-left: 3px;
+			}
+			.icon_approve,
+			.icon_approve_co{
+			    vertical-align: -2px;
+			    vertical-align: text-bottom\9;
+			}
+			.icon_approve {
+			    background-position: 0 -50px;
+			}
+			.icon_approve_co {
+			    background-position: 0 -75px;
+			}
+			.male,.female{
+				vertical-align: text-bottom;
+			}
+			.male{
+			    background-position: 0 0;
+			    width: 12px;
+			}
+			.female{
+			    background-position: 0 -25px;
+			    width: 12px;
+			}
+			.user-result-item:hover{
+				cursor: pointer;
+			}
+
+		</style>
+		<script type="text/javascript" src="jquery-1.11.3.min.js"></script>
+		<script type="text/javascript" src="bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
+		<script type="text/javascript">
+			var lastTimestamp,inputTimeout,lastword;
+			function initialize(){
+				$("#SearchInput").keyup(function(){
+					var word = $(this).val().trim();
+					if(lastword==word||word==null||word.length==0){return;}
+					lastword=word;
+					if(inputTimeout!=null){clearTimeout(inputTimeout);}
+					inputTimeout=setTimeout(function(){sendRequest(word);},100);
+				});
+			}
+			function sendRequest(word){
+				lastTimestamp = new Date().getTime()+"";
+				var src="http://s.weibo.com/ajax/topsuggest.php?_v=callback&_k="
+					+lastTimestamp+"&key=" + word;
+				$("#SearchResult").remove().attr("src", src).appendTo('body');
+			}
+			function test(result){
+				console.log(result);
+			}
+			function callback(result){
+				if(result==null||result.key.localeCompare(lastTimestamp)<0||
+					result.data==null||result.data.user==null){return;}
+				var html = "";
+				for(var i=0;i<result.data.user.length;i++){
+					html+=renderUserResultCard(result.data.user[i]);
+				}
+				$("#UserResult").html(html);
+				$(".user-result-item").bind("click", showWeiboList);
+			}
+			function renderUserResultCard(user){
+				return "<tr class=\"user-result-item\" data=\""+user.u_id+"\">"
+							+"<td>"
+								+"<a target=\"_blank\" title=\""+user.u_name
+									+"\" href=\"http://weibo.com/u/"+user.u_id+"\">"
+									+"<img src=\""+user.u_pic.replace("/30/","/180/")
+										+"\" class=\"img-thumbnail\" alt=\""
+										+ user.u_name+"\" style=\"width:80px;height:80px;\">"
+								+"</a>"
+							+"</td>"
+							+"<td>"
+								+"<h4>" + user.u_name
+									+(user.is_v?"<span class=\"W_icon icon_approve"+
+										(user.verified_type==0?"":"_co")+"\"></span>":"")
+								+"</h4>"
+								+ "<span class=\"W_icon "+(user.sex=="m"?"male":"female")+"\"></span>"
+								+", 粉丝："+user.fans_n
+								+", " + user.prov
+							+"</td>"
+					+"</tr>";
+			}
+			function showWeiboList(event){
+				var uid = $(this).attr("data");
+				console.log(uid);
+			}
+			function WeiboListCallback(result){
+				console.log(result);
+			}
+			$(document).ready(initialize);
+		</script>	
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-xs-4">
+					<input type="text" class="form-control" id="SearchInput">
+				</div>
+			</div>
+			<table class="table table-nonfluid table-hover table-condensed"><tbody id="UserResult"></tbody></table>
+		</div>
+		<script type="text/javascript" id="SearchResult"></script>
+		<script type="text/javascript" id="WeiboResult"></script>
+	</body>
+</html>
