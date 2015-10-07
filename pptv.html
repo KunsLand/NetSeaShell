@@ -7,24 +7,14 @@
 		<style type="text/css">
 			.carousel-control.left, .carousel-control.right {
 			    background-image: none;
-			    color: black;
 			}
-			.carousel-inner > .item > img {
-			    margin: 0 auto;
+			.carousel-caption{
+				right: 0;
+				left: 0;
+				width: 100%;
 			}
-			.carousel-caption {
-			    position: relative;
-			    left: auto;
-			    right: auto;
-			    color: black;
-			}
-			.carousel-indicators li {
-				background-color: #999;
-				background-color: rgba(70,70,70,.25);
-			}
-
-			.carousel-indicators .active {
-				background-color: #444;
+			.carousel-caption a{
+				color: white;
 			}
 		</style>
 		<script type="text/javascript" src="jquery-1.11.3.min.js"></script>
@@ -57,6 +47,7 @@
 				</div>
 		    </div>
 		</div>
+		<script type="text/javascript" src="pptvkey.js"></script>
 		<script type="text/javascript">
 			var pid = "9037639";
 			var count = 0, q=['流畅','高清','超清','蓝光'];
@@ -70,7 +61,7 @@
 					indicators+='<li data-target="#myCarousel" data-slide-to="'+i+'"></li>';
 					listbox +='<div class="item">';
 				}
-				listbox+='<img src="http://s2.pplive.cn/v/cap/'+data.id+'/w160.jpg'+'" alt="'+data.title+'" width="160" height="90">'
+				listbox+='<img src="'+data.pic+'" alt="'+data.title+'" width="100%" height="auto">'
 				listbox+='<div class="carousel-caption"><h3>'+data.title+'</h3>'
 				var len = data.files.length;
 				len = len>q.length?q.length:len;
@@ -78,7 +69,7 @@
 					file = data.files[j];
 					listbox+='<p>'+q[j]+':';
 					for(k=0;k<file.segments;k++){
-						listbox+='&nbsp;&nbsp;<a href="'+file.url.replace('/0/','/'+k+'/')+'">p'+(k+1)+'</a>'
+						listbox+='&nbsp;&nbsp;<a href="'+file.url.replace('/0/','/'+k+'/')+'?key='+data.key+'">p'+(k+1)+'</a>'
 					}
 					listbox+='</p>'
 				}
@@ -87,9 +78,11 @@
 				$('#listbox').append(listbox);
 			}
 			function handleVideoInfoResponse(data){
+				var k = data.timestamp;
 				count--;
-				videos[data.timestamp]=data;
-				keys.push(data.timestamp);
+				keys.push(k);
+				data["key"] = constructKey((Date.parse(data.st) - 60*1000)/1000);
+				videos[k]=data;
 				if(count==0){
 					keys.sort().reverse();
 					for(i=0;i<keys.length;i++){
