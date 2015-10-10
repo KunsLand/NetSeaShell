@@ -23,7 +23,7 @@
 	<body>
 		<div class="container">
 			<div class="panel panel-info">
-				<div class="panel-heading">天天逗文涛</div>
+				<div class="panel-heading">锵锵三人行</div>
 				<div class="panel-body">
 					<div id="myCarousel" class="carousel slide" data-ride="carousel" data-interval="false">
 						<!-- Indicators -->
@@ -47,13 +47,10 @@
 				</div>
 		    </div>
 		</div>
-		<script type="text/javascript" src="pptvkey.js"></script>
 		<script type="text/javascript">
-			var pid = "9037639";
-			var count = 0, q=['流畅','高清','超清','蓝光'];
-			var videos = {}, keys=[];
+			var indicators="", listbox="", count=0, keys=[], videos={};
 			function showData(data,index){
-				var i = index, j, file, k,indicators="", listbox="";
+				var i = index;
 				if(i==0){
 					indicators+='<li data-target="#myCarousel" data-slide-to="0" class="active"></li>';
 					listbox +='<div class="item active">';
@@ -61,54 +58,46 @@
 					indicators+='<li data-target="#myCarousel" data-slide-to="'+i+'"></li>';
 					listbox +='<div class="item">';
 				}
-				listbox+='<img src="'+data.pic+'" alt="'+data.title+'" width="100%" height="auto">';
-				listbox+='<div class="carousel-caption"><h3>'+data.title+'</h3>';
-				var len = data.files.length;
-				len = len>q.length?q.length:len;
-				for(j=0;j<len;j++){
-					file = data.files[j];
-					listbox+='<p>'+q[j]+':';
-					for(k=0;k<file.segments;k++){
-						listbox+='&nbsp;&nbsp;<a href="'+file.url.replace('/0/','/'+k+'/')+'?key='+data.key+'">p'+(k+1)+'</a>'
-					}
-					listbox+='</p>'
-				}
-				listbox+="</div></div>"
-				$('#indicators').append(indicators);
-				$('#listbox').append(listbox);
+				var url = data.videos[1].url;
+				listbox+='<a href="'+url+'" target="_blank"><img src="'+data.img+'" alt="'+data.title+'" width="100%" height="auto"></a>';
+				listbox+='<div class="carousel-caption"><h3>'+data.title+'</h3></div></div>';
 			}
 			function handleVideoInfoResponse(data){
-				var k = data.timestamp;
+				var k = data.date;
 				count--;
 				keys.push(k);
-				data["key"] = constructKey((Date.parse(data.st) - 60*1000)/1000);
 				videos[k]=data;
 				if(count==0){
 					keys.sort().reverse();
 					for(i=0;i<keys.length;i++){
 						showData(videos[keys[i]],i);
 					}
+					$('#indicators').append(indicators);
+					$('#listbox').append(listbox);
 				}
 			}
-			function requestVideoInfo(id){
-				if($('#vid-'+id).length>0){return;}
-				var script = document.createElement('script');
-				script.src="http://jsonhub.sinaapp.com/?target=pptv&jsonp=handleVideoInfoResponse&vid="+id;
-				script.id="vid-"+id;
-				$('body').append(script);
-			}
-			function handleVideoListResponse(resp){
-				var list = resp.data.list, i;
-				for(i=0;i<list.length;i++){
-					requestVideoInfo(list[i].id);
-					count++;
+			function BSCallBack(f, g){
+				this.f = f;
+				this.getSinglePage = function(data){
+					var list = data.dataList;
+					var len = Math.min(list.length,5);
+					g(len);
+					for(var i=0;i<len;i++){
+						var id = list[i].guid;
+						if($('#vid-'+id).length>0){return;}
+						var script = document.createElement('script');
+						script.src="http://jsonhub.sinaapp.com/?target=ifeng&jsonp="+this.f+"&guid="+id;
+						script.id="vid-"+id;
+						$('body').append(script);
+					}
 				}
 			}
+			var bsCallback = new BSCallBack('handleVideoInfoResponse', function(c){count=c;});
 			$(document).ready(function(){
-				var src = "http://jsonhub.sinaapp.com/?target=pptv&pid=9037639&jsonp=handleVideoListResponse";
-				$("#videolist").remove().attr("src", src).appendTo('body');
+				var src = "http://v.ifeng.com/docvlist/d5f1032b-fe8b-4fbf-ab6b-601caa9480eb/48-1.js";
+				$('#video-list-json').remove().attr("src", src).appendTo('body');
 			});
 		</script>
-		<script type="text/javascript" id="videolist"></script>
+		<script type="text/javascript" id="video-list-json"></script>
 	</body>
 </html>
