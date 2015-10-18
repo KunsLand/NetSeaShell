@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link rel="shortcut icon" type="image/png" href="favicon.png"/>
+		<link rel="stylesheet" type="text/css" href="bootstrap-3.3.5-dist/css/bootstrap.min.css">
+		<style type="text/css">
+			.table-nonfluid {
+			   width: auto !important;
+			}
+			.table td, .table th {
+			    border: none !important;
+			}
+			.table img{
+				width: auto;
+				height: 144px;
+			}
+		</style>
+		<script type="text/javascript" src="jquery-1.11.3.min.js"></script>
+		<script type="text/javascript" src="bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-6">
+					<div class="input-group">
+						<input type="text" class="form-control" placeholder="Search for..." id="input">
+						<span class="input-group-btn">
+							<button class="btn btn-default" type="button" id="btn-clk">Go!</button>
+						</span>
+					</div>
+				</div>
+			</div>
+			<div id="searching" style="display:none">Searching...</div>
+			<div id="no-result" style="display:none">No result...</div>
+			<table class="table table-nonfluid table-hover table-condensed"><tbody id="song-list"></tbody></table>
+		</div>
+		<script type="text/javascript">
+			function renderSongCard(data){
+				var item = data.data[0];
+				var id=item.object_id.replace(/[:_]/g, "-");
+				var singers = [];
+				for(var i=0;i<item.singers.length;i++){
+					singers.push(item.singers[i].singer_name);
+				}
+				$('#id-'+id).html('<td><img src="'+item.photo+'"></td><td>'
+					+'<h4>'+item.songname+'</h4>'
+					+'<p>'+singers.join(",")+'</p>'
+					+'<p>'+item.source_name+'</p>'
+					+'<audio src="'+item.mp3_url+'" controls></audio>'
+					+'</td>');
+			}
+			function showSongsList(data){
+				$('#searching').hide();
+				if(data==null||data.data.length==0){
+					$('#no-result').show();
+				}
+				var list = data.data;
+				var view = "";
+				var len = list.length>10?10:list.length;
+				for(var i=0;i<len;i++){
+					var item = list[i];
+					view += '<tr id="id-'+item.object_id.replace(/[:_]/g, "-")+'"></tr>';
+					if(i>0){
+						var script = document.createElement('script');
+						script.src="http://jsonhub.sinaapp.com/?target=weibo&callback=renderSongCard&song="+item.object_id;
+						script.id="sid-"+item.object_id;
+						$('body').append(script);
+					}
+				}
+				$('#song-list').html(view);
+				renderSongCard(data);
+			}
+			$('#btn-clk').click(function(){
+				var str = $('#input').val();
+				if(str.length<1){ return; }
+				$('#no-result').hide();
+				$('#searching').show();
+				var src = "http://jsonhub.sinaapp.com/?target=weibo&callback=showSongsList&songs="+str;
+				$('#result').remove().attr("src", src).appendTo('body');
+			});
+		</script>
+		<script type="text/javascript" id="result"></script>
+		<script type="text/javascript" id="song"></script>
+	</body>
+</html>
