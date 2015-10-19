@@ -22,9 +22,9 @@
 	<body>
 		<div class="container">
 			<div class="row">
-				<div class="col-lg-6">
+				<div class="col-md-6">
 					<div class="input-group">
-						<input type="text" class="form-control" placeholder="Search for..." id="input">
+						<input type="text" class="form-control" placeholder="Search for music..." id="input">
 						<span class="input-group-btn">
 							<button class="btn btn-default" type="button" id="btn-clk">Go!</button>
 						</span>
@@ -47,7 +47,7 @@
 					+'<h4>'+item.songname+'</h4>'
 					+'<p>'+singers.join(",")+'</p>'
 					+'<p>'+item.source_name+'</p>'
-					+'<audio src="'+item.mp3_url+'" controls></audio>'
+					+'<audio src="'+item.mp3_url+'" controls loop></audio>'
 					+'</td>');
 			}
 			function showSongsList(data){
