@@ -71,13 +71,20 @@
 				$('#song-list').html(view);
 				renderSongCard(data);
 			}
-			$('#btn-clk').click(function(){
+			function doSearch(){
 				var str = $('#input').val();
 				if(str.length<1){ return; }
 				$('#no-result').hide();
 				$('#searching').show();
 				var src = "http://jsonhub.sinaapp.com/?target=weibo&callback=showSongsList&songs="+str;
 				$('#result').remove().attr("src", src).appendTo('body');
+			}
+
+			$('#btn-clk').click(doSearch);
+			$('#input').keypress(function(e) {
+			    if(e.which == 13) {
+			    	doSearch();
+			    }
 			});
 		</script>
 		<script type="text/javascript" id="result"></script>
