@@ -13,7 +13,15 @@
 			}
 			.table img{
 				width: auto;
-				height: 144px;
+				height: 174px;
+			}
+			p.lyric{
+				height: 20px;
+				color: green;
+			}
+			audio{
+				width: 300px;
+				height: 30px;
 			}
 		</style>
 		<script type="text/javascript" src="jquery-1.11.3.min.js"></script>
@@ -36,10 +44,46 @@
 			<table class="table table-nonfluid table-hover table-condensed"><tbody id="song-list"></tbody></table>
 		</div>
 		<script type="text/javascript">
+			function displayLyrics(id, lyrics){
+				var index = 0, max = 0;
+				return function(){
+					$('#id-'+id).find('audio')[0].addEventListener('timeupdate', function(e){
+						var cur = this.currentTime;
+						if(cur>=max){
+							max = cur;
+						}else{
+							this.currentTime = 0;
+							this.play = true;
+							cur = 0;
+							index=0;
+							max = 0;
+						}
+						if(index<lyrics.length&&cur>=lyrics[index][0]){
+							$('#lyrics-'+id).html(lyrics[index++][1]);
+						}
+					});
+				}
+			}
+			function parseLyrics(lyricStr){
+				var lines = lyricStr.split('\n'),
+					pattern = /\[\d{2}:\d{2}\.\d{2}\]/g,
+					lyrics = [];
+				for(var i=0;i<lines.length;i++){
+					if(!pattern.test(lines[i])){
+						continue;
+					}
+					var time = lines[i].match(pattern)[0].split(':'),
+						lyric = lines[i].replace(pattern,'');
+					var t = parseInt(time[0].substr(1))*60 + parseFloat(time[1]);
+					lyrics.push([t,lyric]);
+				}
+				return lyrics;
+			}
 			function renderSongCard(data){
 				var item = data.data[0];
 				var id=item.object_id.replace(/[:_]/g, "-");
 				var singers = [];
+				var flag = item.lyric_info!=null&&item.lyric_info.length>0;
 				for(var i=0;i<item.singers.length;i++){
 					singers.push(item.singers[i].singer_name);
 				}
@@ -47,8 +91,16 @@
 					+'<h4>'+item.songname+'</h4>'
 					+'<p>'+singers.join(",")+'</p>'
 					+'<p>'+item.source_name+'</p>'
-					+'<audio src="'+item.mp3_url+'" controls loop></audio>'
+					+'<p class="lyric" id="lyrics-'+id+'"></p>'
+					+'<audio src="'+item.mp3_url+'" controls loop>'
+						+'<itext lang="en" type="text/lrc" display="yes"'
+           					+' category="LRC">' + item.lyric_info
+           				+'</itext>'
+           			+'</audio>'
 					+'</td>');
+				if(flag){
+					 displayLyrics(id, parseLyrics(item.lyric_info))();
+				}
 			}
 			function showSongsList(data){
 				$('#searching').hide();
