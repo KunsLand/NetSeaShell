@@ -1,0 +1,13 @@
+.carousel-control.left, .carousel-control.right {
+    background-image: none;
+}
+.carousel-caption {
+    right: 0;
+    left: 0;
+    width: 100%;
+}
+.carousel-caption a{
+    color: white;
+}
+.carousel-cap
+	       
