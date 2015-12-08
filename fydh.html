@@ -74,7 +74,7 @@
 						var id = list[i].guid;
 						if($('#vid-'+id).length>0){return;}
 						var script = document.createElement('script');
-						script.src="http://jsonhub2.sinaapp.com/?target=ifeng&jsonp="+this.f+"&guid="+id;
+						script.src="http://jsonhub.sinaapp.com/?target=ifeng&jsonp="+this.f+"&guid="+id;
 						script.id="vid-"+id;
 						$('body').append(script);
 					}
